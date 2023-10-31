@@ -1,0 +1,23 @@
+{
+  "name": "tool-plagiarism-checker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/virtual-labs/tool-plagiarism-checker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/virtual-labs/tool-plagiarism-checker/issues"
+  },
+  "homepage": "https://github.com/virtual-labs/tool-plagiarism-checker#readme",
+  "dependencies": {
+    "pro_writing_aid_api": "^2.0.0",
+    "shelljs": "^0.8.5"
+  }
+}
