@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/virtual-labs/tool-plagiarism-checker#readme",
   "dependencies": {
+    "markdown-it": "^13.0.2",
     "pro_writing_aid_api": "^2.0.0",
     "shelljs": "^0.8.5"
   }
