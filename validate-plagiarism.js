@@ -4,35 +4,57 @@ const path = require('path');
 const markdownIt = require('markdown-it')();
 
 // Function to extract text content from JSON
-function extractTextFromJSON(jsonContent, prefix = '') {
+function extractTextFromJSON2(jsonContent, prefix = ' ') {
     let result = '';
 
     if (Array.isArray(jsonContent)) {
         for (let i = 0; i < jsonContent.length; i++) {
-            result += extractTextFromJSON(jsonContent[i], `${prefix}${i + 1}. `);
+            result += extractTextFromJSON(jsonContent[i], `${prefix}`);
         }
     } else if (typeof jsonContent === 'object') {
         for (const key in jsonContent) {
-            result += `${prefix}${key}: `;
-            result += extractTextFromJSON(jsonContent[key], `${prefix}  `);
+            result += extractTextFromJSON(jsonContent[key], `${prefix}`);
         }
-    } else if (typeof jsonContent === 'string') {
-        result += `${jsonContent} `;
+    } else if (typeof jsonContent === 'string' || typeof jsonContent === 'number') {
+        result += `${prefix}${jsonContent.toString()} `;
     }
 
     return result.trim() + '\n';
 }
 
+function extractTextFromJSON(jsonContent,prefix=''){
+    // iterate over the questions list in jsonContent.questions
+    let result = '';
+    for (let i = 0; i < jsonContent.questions.length; i++) {
+        // iterate over the options list in jsonContent.questions[i].options
+        result += `${prefix}${jsonContent.questions[i].question} `;
+        result += `${prefix}${jsonContent.questions[i].answers.a} `;
+        result += `${prefix}${jsonContent.questions[i].answers.b} `;
+        result += `${prefix}${jsonContent.questions[i].answers.c} `;
+        result += `${prefix}${jsonContent.questions[i].answers.d} `;
+    }
+    return result.trim() + '\n';
+}
 
 // Function to extract text content from Markdown, skipping images
 function extractTextFromMarkdown(markdownContent) {
+    const htmlTagRegex = /<img[^>]*>/g;
+    markdownContent = markdownContent.replace(htmlTagRegex, '');
+    // remove special markdown characters such as **, *, #,>,<=,< etc.
+    markdownContent = markdownContent.replace(/[*#]/g, '');
+
     // Use a Markdown parsing library to handle Markdown content properly
 
     // Tokenize the Markdown content
     const tokens = markdownIt.parse(markdownContent, {});
 
-    // Filter out image tokens and extract the remaining text
-    const textTokens = tokens.filter((token) => token.type !== 'image' && token.type !== 'html_block');
+    // Filter out inline tokens that contain the <img> tag and exclude HTML blocks
+    const textTokens = tokens.filter(
+        (token) =>
+            (token.type === 'inline' && token.content.includes('<img')) ||
+            token.type !== 'html_block'
+    );
+
     const textContent = textTokens.map((token) => token.content).join(' ');
 
     return textContent;
@@ -41,6 +63,8 @@ function extractTextFromMarkdown(markdownContent) {
 // Read files from the specified folder
 const folderPath = './';
 
+const htmlResult = []; // Store HTML results
+
 fs.readdir(folderPath, (err, files) => {
     if (err) {
         console.error('Error reading the folder: ' + err);
@@ -48,7 +72,6 @@ fs.readdir(folderPath, (err, files) => {
     }
 
     files.forEach((file) => {
-        console.log(file);
         const filePath = path.join(folderPath, file);
         const fileExtension = path.extname(filePath);
 
@@ -61,55 +84,40 @@ fs.readdir(folderPath, (err, files) => {
                     // Extract the text content based on the file type
                     let textContent = '';
                     if (file === 'posttest.json' || file === 'pretest.json') {
+                        // parse the content to JSON
+                        content = JSON.parse(content);
                         textContent = extractTextFromJSON(content);
                     } else if (fileExtension === '.md') {
+                        // parse the content to Markdown
                         textContent = extractTextFromMarkdown(content);
                     }
-                    // redirect textContent to a file if it is .json
-                    if (file === 'posttest.json' || file === 'pretest.json') {
-                        fs.writeFile('posttest1.txt', textContent, (err) => {
-                            if (err) throw err;
-                            console.log('The file has been saved!');
-                        });
-                    }
-                    if (textContent) {
-                        // Encode the text content using encodeURIComponent()
-                        const encodedTextContent = encodeURIComponent(textContent);
-                        console.log("encoded text content: ",encodedTextContent);
-                        const keyValue = process.argv[2];
-                        console.log("==============================================");
-                        // redirect text content of md files and json files to different files
-                        if (file === 'posttest.json' || file === 'pretest.json') {
-                            fs.writeFile('posttest.txt', textContent, (err) => {
-                                if (err) throw err;
-                                console.log('The file has been saved!');
-                            });
-                        } else if (fileExtension === '.md') {
-                            fs.writeFile('theory.txt', textContent, (err) => {
-                                if (err) throw err;
-                                console.log('The file has been saved!');
-                            });
-                        }
-                        // Use the encoded text in the curlCommand
-                        // const curlCommand = `curl -X POST https://www.prepostseo.com/apis/checkPlag ` +
-                        //     `-d "key=${keyValue}" ` +
-                        //     `-d "data=${encodedTextContent}"`;
+                    // Write the textContent to posttest.txt if posttest.json
 
-                        // // Execute the curl command
-                        // const result = shell.exec(curlCommand);
-                        // if (result.code !== 0) {
-                        //     console.error('Error: ' + result.stderr);
-                        // } else {
-                        //     console.log("=============================================================================================");
-                        //     const sources = JSON.parse(result.stdout).sources;
-                        //     console.log("The plagiarism is with the following links for file: " + file);
-                        //     sources.forEach((source) => {
-                        //         console.log(source.link);
-                        //     });
-                        //     console.log("=============================================================================================");
-                        //     const plagPercent = JSON.parse(result.stdout).plagPercent;
-                        //     console.log("The plagiarism percentage for file " + file + " is: " + plagPercent);
-                        // }
+                    if (textContent) {
+                        const keyValue = process.argv[2];
+                        // Use the encoded text in the curlCommand
+                        const encodedTextContent = encodeURIComponent(textContent);
+                        const curlCommand = `curl -X POST https://www.prepostseo.com/apis/checkPlag ` +
+                            `-d "key=${keyValue}" ` +
+                            `-d "data=${encodedTextContent}"`;
+
+                        // Execute the curl command
+                        const result = shell.exec(curlCommand);
+                        if (result.code !== 0) {
+                            console.error('Error: ' + result.stderr);
+                        } else {
+                            const sources = JSON.parse(result.stdout).sources;
+                            const links = sources.map((source) => source.link);
+                            htmlResult.push(`<h3>Plagiarism Links for ${file}:</h3>`);
+                            htmlResult.push('<ul>');
+                            links.forEach((link) => {
+                                htmlResult.push(`<li><a href="${link}">${link}</a></li>`);
+                            });
+                            htmlResult.push('</ul>');
+
+                            const plagPercent = JSON.parse(result.stdout).plagPercent;
+                            htmlResult.push(`<p>Plagiarism Percentage for ${file}: ${plagPercent}%</p>`);
+                        }
                     }
                 }
             });
@@ -117,4 +125,10 @@ fs.readdir(folderPath, (err, files) => {
             console.log(`Skipping unsupported file: ${file}`);
         }
     });
+});
+
+// When all file processing is complete, write the HTML results to a file
+process.on('exit', () => {
+    fs.writeFileSync('result.html', htmlResult.join('\n'), 'utf8');
+    console.log('Results written to result.html');
 });

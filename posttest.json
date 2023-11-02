@@ -2,36 +2,36 @@
     "version": 2.0,
     "questions": [
         {
-            "question": "1. In a basic counter, what should the values of input J and K be set to:",
+            "question": "1. A positive edge-triggered D flip-flop is connected to a positive edge-triggered J K flip-flop. The Q output of the D flip-flop is connected to both the J and K inputs of the J K flip-flop, while the Q output of the J K flip-flop is connected to the input of the D flip-flop. At first, the output of a D flip-flop is set to logic one, and the output of the JK flip-flop is cleared. Which one of the following options is the bit sequence generated at the Q output of the JK flip-flop when the flip-flops are connected to a free-running standard clock? Consider that J = K = 1 is the toggle mode and J = K = 0 is the state-holding mode of the JK flip-flop. Both the flip-flops have non-zero propagation delays.",
             "answers": {
-                "a": "1, 1",
-                "b": "0, 0",
-                "c": "0, 1",
-                "d": "1, 0"
+                "a": "0 1 1 0 1 1 0",
+                "b": "0 1 0 0 1 0 0",
+                "c": "0 1 1 1 0 1 1 1 0 ",
+                "d": "0 1 1 0 0 1 1 0 0"
             },
             "correctAnswer": "a",
             "explanations": {"a":"J and K are required to be set to 1 thereby converting the J-K flip-flops to T flip-flops"},
             "difficulty": "beginner"
         },
         {
-            "question": "2. What is the Clk input point of the JK flip-flop, whose Q output is connected to QB, connected to :",
+            "question": "2. A four-bit Johnson counter with an initial value of (0000). The sequence of counting is:-",
             "answers": {
-                "a": "Clock",
-                "b": "J",
-                "c": "Q of other JK flip flop",
-                "d": "Q' of other JK flip flop"
+                "a": "( 0, 1, 3, 7, 15, 14, 12, 8, 0 )",
+                "b": "( 0, 1, 3, 5, 7, 9, 11, 13, 15, 0 )",
+                "c": "( 0, 2, 4, 6, 8, 10, 12, 14, 0 )",
+                "d": "( 0, 8, 12, 14, 15, 7, 3, 1, 0 )"
             },
             "correctAnswer": "c",
             "explanations": {"c":"In general in an n-bit asynchronous basic binary counter, only the first flip flop's clk input is connected to Clock, clocks of all other flip flops are connected to Q of the previous flip flop"},
             "difficulty": "intermediate"
         },
         {
-            "question": "3. In a ring counter circuit, ORI:",
+            "question": "3. The minimum number of J K flip-flops required to construct a synchronous counter with the sequence like ( 0, 0, 1, 1, 2, 2, 3, 3, 0, 0, ...) is:- ",
             "answers": {
-                "a": "is initially set to low and remains low throughout the experiment",
-                "b": "is used as clear and preset",
-                "c": "both A and B",
-                "d": "None of the above"
+                "a": "0",
+                "b": "1",
+                "c": "2",
+                "d": "3"
             },
             "correctAnswer": "b",
             "explanations": {
@@ -40,24 +40,24 @@
             "difficulty": "intermediate"
         },
         {
-            "question": "4. In a ring counter number of states is equal to:",
+            "question": "4. The number of pulses is needed to change the contents of an 8-bit up-counter from 10101100 to 00100111 (the rightmost bit is the LSB)?",
             "answers": {
-                "a": "half of the no. of flip-flops used ",
-                "b": "twice the no. of flip-flops used",
-                "c": "the no. of flip-flops used",
-                "d": "2^(the no. of flip-flops used)"
+                "a": "134",
+                "b": "133",
+                "c": "124",
+                "d": "123"
             },
             "correctAnswer": "c",
             "explanations": {"c":"Number of states = number of flip flops for a ring counter as at a given time only one flip flop can have the value 1"},
             "difficulty": "beginner"
         },
         {
-            "question": "5. In a basic counter no. of flip-flops used is equal to:",
+            "question": "5. To design a synchronous counter having sequence ( 0-1-0-2-0-3 ) and then repeats. To implement this counter is the minimum number of J-K flip-flops required. Note: This question was asked as a Numerical Answer Type.",
             "answers": {
-                "a": "half of the no. of possible states ",
-                "b": "ln(the no. of possible states) ",
-                "c": "log2(the no. of possible states)",
-                "d": "2^(the no. of possible states)"
+                "a": "1",
+                "b": "2",
+                "c": "4",
+                "d": "5"
             },
             "correctAnswer": "c",
             "explanations": {"c":"Number of possible states = 2^(number of flip flops) for a basic counter. So number of flip flops = log2(number of possible states)"},
