@@ -4,24 +4,6 @@ const path = require('path');
 const markdownIt = require('markdown-it')();
 
 // Function to extract text content from JSON
-function extractTextFromJSON2(jsonContent, prefix = ' ') {
-    let result = '';
-
-    if (Array.isArray(jsonContent)) {
-        for (let i = 0; i < jsonContent.length; i++) {
-            result += extractTextFromJSON(jsonContent[i], `${prefix}`);
-        }
-    } else if (typeof jsonContent === 'object') {
-        for (const key in jsonContent) {
-            result += extractTextFromJSON(jsonContent[key], `${prefix}`);
-        }
-    } else if (typeof jsonContent === 'string' || typeof jsonContent === 'number') {
-        result += `${prefix}${jsonContent.toString()} `;
-    }
-
-    return result.trim() + '\n';
-}
-
 function extractTextFromJSON(jsonContent,prefix=''){
     // iterate over the questions list in jsonContent.questions
     let result = '';
