@@ -4,7 +4,7 @@ const path = require('path');
 const markdownIt = require('markdown-it')();
 
 // Function to extract text content from JSON
-function extractTextFromJSON(jsonContent,prefix=''){
+function extractTextFromJSON(jsonContent, prefix = '') {
     // iterate over the questions list in jsonContent.questions
     let result = '';
     for (let i = 0; i < jsonContent.questions.length; i++) {
@@ -42,6 +42,10 @@ function extractTextFromMarkdown(markdownContent) {
     return textContent;
 }
 
+function createDropdown(query) {
+    return `<p>${query}</p>`;
+}
+
 // Read files from the specified folder
 const folderPath = './';
 
@@ -74,7 +78,6 @@ fs.readdir(folderPath, (err, files) => {
                         textContent = extractTextFromMarkdown(content);
                     }
                     // Write the textContent to posttest.txt if posttest.json
-
                     if (textContent) {
                         const keyValue = process.argv[2];
                         // Use the encoded text in the curlCommand
@@ -89,13 +92,59 @@ fs.readdir(folderPath, (err, files) => {
                             console.error('Error: ' + result.stderr);
                         } else {
                             const sources = JSON.parse(result.stdout).sources;
-                            const links = sources.map((source) => source.link);
-                            htmlResult.push(`<h3>Plagiarism Links for ${file}:</h3>`);
-                            htmlResult.push('<ul>');
-                            links.forEach((link) => {
-                                htmlResult.push(`<li><a href="${link}">${link}</a></li>`);
-                            });
-                            htmlResult.push('</ul>');
+                            const details = JSON.parse(result.stdout).details;
+                            console.log("Sources are below : \n", sources);
+                            console.log("Details are below : \n", details);
+                            const plagiarizedLinks = details
+                                .filter((detail) => detail.unique === "false")
+                                .map((detail) => {
+                                    return {
+                                        url: detail.display.url,
+                                        dropdown: createDropdown(detail.query),
+                                    };
+                                });
+
+                            if (plagiarizedLinks.length > 0) {
+                                htmlResult.push(`<h3>Plagiarism Links for ${file}:</h3>`);
+                                htmlResult.push('<ul>');
+                                // 1. Sort the plagiarizedLinks array by url
+                                plagiarizedLinks.sort((a, b) => {
+                                    if (a.url < b.url) {
+                                        return -1;
+                                    } else if (a.url > b.url) {
+                                        return 1;
+                                    } else {
+                                        return 0;
+                                    }
+                                }
+                                );
+                                // Create a new array that store the concatenated dropdowns of duplicate links
+                                const newPlagiarizedLinks = [];
+                                let index = 0;
+                                while (index < plagiarizedLinks.length) {
+                                    const link = plagiarizedLinks[index];
+                                    let newDropdown = link.dropdown;
+                                    index++;
+                                    while (index < plagiarizedLinks.length && link.url === plagiarizedLinks[index].url) {
+                                        newDropdown += plagiarizedLinks[index].dropdown;
+                                        index++;
+                                    }
+                                    newPlagiarizedLinks.push({
+                                        url: link.url,
+                                        dropdown: newDropdown,
+                                    });
+                                }
+                                newPlagiarizedLinks.forEach((link) => {
+                                    htmlResult.push(`<li><a href="${link.url}">${link.url}</a>`);
+                                    htmlResult.push('<details>');
+                                    htmlResult.push('<summary>Plagiarized Content</summary>');
+                                    htmlResult.push(link.dropdown);
+                                    htmlResult.push('</details>');
+                                    htmlResult.push('</li>');
+                                }
+                                );
+                                htmlResult.push('</ul>');
+                            }
 
                             const plagPercent = JSON.parse(result.stdout).plagPercent;
                             htmlResult.push(`<p>Plagiarism Percentage for ${file}: ${plagPercent}%</p>`);
